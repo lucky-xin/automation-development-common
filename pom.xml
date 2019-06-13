@@ -87,11 +87,4 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
-
-    <distributionManagement>
-        <repository>
-            <id>admin</id>
-            <url>http://nexus-console.datainsights.biz/repository/maven-releases/</url>
-        </repository>
-    </distributionManagement>
 </project>
