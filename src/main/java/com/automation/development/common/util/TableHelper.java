@@ -210,8 +210,15 @@ public class TableHelper {
         return tableInfo.getName();
     }
 
-    public static String getAddColumnSql(com.baomidou.mybatisplus.generator.config.po.TableField field) {
+    public static String getAddPgSqlColumnSql(com.baomidou.mybatisplus.generator.config.po.TableField field) {
         String sql = String.format(" ADD COLUMN %s %s", field.getName(), DbTypeMapper.getPgSqlType((DbColumnType) field.getColumnType()));
+        return sql;
+    }
+
+    public static String getAddMySqlColumnSql(com.baomidou.mybatisplus.generator.config.po.TableField field) {
+        String sql = String.format(" ADD COLUMN %s %s comment '%s'", field.getName(),
+                DbTypeMapper.getMySqlType((DbColumnType) field.getColumnType()),
+                field.getComment());
         return sql;
     }
 
