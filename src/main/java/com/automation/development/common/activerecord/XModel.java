@@ -5,7 +5,6 @@ import com.automation.development.common.model.ModelFactory;
 import com.automation.development.common.service.DistributeIdService;
 import com.automation.development.common.util.FieldHelper;
 import com.automation.development.common.util.TableHelper;
-
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
@@ -20,7 +19,7 @@ import com.baomidou.mybatisplus.extension.toolkit.SqlRunner;
 import com.xin.utils.BeanUtil;
 import com.xin.utils.CollectionUtil;
 import com.xin.utils.StringUtil;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.SqlSession;
 
 import java.io.Serializable;
@@ -35,7 +34,7 @@ import java.util.stream.Collectors;
  * @Description: 拓展Model，反射获取关联字段查询数据库，并且设置该字段值
  * @date 2019-05-05 10:20
  */
-@Log4j
+@Slf4j
 public abstract class XModel<T extends XModel<?>> extends Model<T> {
 
     @TableField(exist = false)
