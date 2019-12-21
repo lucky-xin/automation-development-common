@@ -1,7 +1,8 @@
 package com.automation.development.common.model;
 
-import biz.datainsights.utils.CollectionUtil;
-import biz.datainsights.utils.StringUtil;
+
+import com.xin.utils.CollectionUtil;
+import com.xin.utils.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;

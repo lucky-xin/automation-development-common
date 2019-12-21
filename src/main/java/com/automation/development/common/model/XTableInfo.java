@@ -1,11 +1,10 @@
 package com.automation.development.common.model;
 
-
-import biz.datainsights.utils.CollectionUtil;
-import biz.datainsights.utils.StringUtil;
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.generator.config.po.TableField;
 import com.baomidou.mybatisplus.generator.config.po.TableInfo;
+import com.xin.utils.CollectionUtil;
+import com.xin.utils.StringUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
