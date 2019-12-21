@@ -14,81 +14,81 @@ import java.util.Objects;
  */
 @Data
 @Accessors(chain = true)
-public class ExtensionRelationInfo<T extends XModel> {
+public class ExtensionRelationInfo<T extends XModel<?>> {
 
-    private String middleTable;
+	private String middleTable;
 
-    private String middleEntry;
+	private String middleEntry;
 
-    private String middleProperty;
+	private String middleProperty;
 
-    private String relationColumn;
+	private String relationColumn;
 
-    private String relationUri;
+	private String relationUri;
 
-    private String relationTable;
+	private String relationTable;
 
-    private String relationTablePk;
+	private String relationTablePk;
 
-    private String relationEntry;
+	private String relationEntry;
 
-    private String relationProperty;
+	private String relationProperty;
 
-    private String relationToTable;
+	private String relationToTable;
 
-    private String relationToColumn;
+	private String relationToColumn;
 
-    private String relationToUri;
+	private String relationToUri;
 
-    private String relationToEntry;
+	private String relationToEntry;
 
-    private String relationToProperty;
+	private String relationToProperty;
 
-    private String relationToTablePk;
+	private String relationToTablePk;
 
-    private boolean isMany;
+	private boolean isMany;
 
-    private boolean injectBeRelationEntry = true;
+	private boolean injectBeRelationEntry = true;
 
-    private XModel model;
+	private XModel model;
 
-    private Field declaredField;
+	private Field declaredField;
 
-    private boolean isReachable;
+	private boolean isReachable;
 
-    private Class<T> relationEntryClass;
+	private Class<T> relationEntryClass;
 
-    private Class<T> relationToEntryClass;
+	private Class<T> relationToEntryClass;
 
-    private Class<T> middleEntryClass;
+	private Class<T> middleEntryClass;
 
-    private Class<T> fieldActualClass;
+	private Class<T> fieldActualClass;
 
-    public boolean getIsMany() {
-        return isMany;
-    }
+	public boolean getIsMany() {
+		return isMany;
+	}
 
-    public boolean getInjectBeRelationEntry() {
-        return injectBeRelationEntry;
-    }
+	public boolean getInjectBeRelationEntry() {
+		return injectBeRelationEntry;
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ExtensionRelationInfo that = (ExtensionRelationInfo) o;
-        return Objects.equals(relationColumn, that.relationColumn) &&
-                Objects.equals(relationToColumn, that.relationToColumn) &&
-                Objects.equals(middleTable, that.middleTable) &&
-                Objects.equals(relationToTable, that.relationToTable);
-    }
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		ExtensionRelationInfo that = (ExtensionRelationInfo) o;
+		return Objects.equals(relationColumn, that.relationColumn) &&
+				Objects.equals(relationToColumn, that.relationToColumn) &&
+				Objects.equals(middleTable, that.middleTable) &&
+				Objects.equals(relationToTable, that.relationToTable);
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(relationColumn, relationToColumn, middleTable, relationToTable);
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hash(relationColumn, relationToColumn, middleTable, relationToTable);
+	}
 }

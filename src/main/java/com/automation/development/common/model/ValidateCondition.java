@@ -1,6 +1,6 @@
 package com.automation.development.common.model;
 
-import com.xin.utils.StringUtil;
+import biz.datainsights.utils.StringUtil;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;

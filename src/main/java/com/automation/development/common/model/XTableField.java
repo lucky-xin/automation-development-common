@@ -1,10 +1,10 @@
 package com.automation.development.common.model;
 
-import com.automation.development.common.util.TableHelper;
+import biz.datainsights.automation.development.common.util.TableHelper;
+import biz.datainsights.utils.StringUtil;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.generator.config.po.TableField;
 import com.baomidou.mybatisplus.generator.config.rules.DbColumnType;
-import com.xin.utils.StringUtil;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;

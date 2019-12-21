@@ -3,6 +3,7 @@ package com.automation.development.common.service.impl;
 
 import com.automation.development.common.activerecord.XModel;
 import com.automation.development.common.service.DistributeIdService;
+import com.automation.development.common.service.SelfBeanAware;
 import com.baomidou.mybatisplus.core.enums.SqlMethod;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.TableInfo;
@@ -19,6 +20,7 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -27,10 +29,12 @@ import java.util.function.Function;
  * @Description: 自定义ServiceImpl
  * @date 2019-05-06 19:47
  */
-public class XServiceImpl<M extends BaseMapper<T>, T extends XModel> extends ServiceImpl<M, T> {
+public class XServiceImpl<M extends BaseMapper<T>, T extends XModel> extends ServiceImpl<M, T> implements SelfBeanAware {
 
     @Autowired
     protected DistributeIdService distributeIdService;
+
+    private XServiceImpl<M, T> self;
 
     @Override
     public boolean save(T entity) {
@@ -152,5 +156,19 @@ public class XServiceImpl<M extends BaseMapper<T>, T extends XModel> extends Ser
      */
     public List<Object> selectObjs(String sql, Object... args) {
         return new SqlRunner().selectObjs(sql, args);
+    }
+
+    @Override
+    public void setSelfObj(Object instance) {
+        if (instance instanceof XServiceImpl) {
+            self = (XServiceImpl) instance;
+        }
+    }
+
+    public XServiceImpl<M, T> self() {
+        if (Objects.nonNull(self)) {
+            return self;
+        }
+        return this;
     }
 }

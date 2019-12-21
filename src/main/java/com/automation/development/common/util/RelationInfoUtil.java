@@ -1,6 +1,5 @@
 package com.automation.development.common.util;
 
-
 import com.automation.development.common.activerecord.XModel;
 import com.automation.development.common.annotation.RelationColumn;
 import com.automation.development.common.annotation.RelationToColumn;

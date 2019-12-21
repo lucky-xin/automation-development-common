@@ -20,7 +20,7 @@ public class DbTypeMapper {
             case LONG:
                 return " bigint";
             case DOUBLE:
-                return "double";
+                return " float8";
             case STRING:
                 return " character varying(100) COLLATE pg_catalog.\"default\"";
             case TIMESTAMP:
