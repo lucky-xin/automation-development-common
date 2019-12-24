@@ -28,12 +28,12 @@ public class XTableInfo extends TableInfo implements Comparable<TableInfo> {
     /**
      * 所有关联关系信息
      */
-    private Set<RelationInfo> relationInfos = new TreeSet<>();
+    private Set<RelInfo> relInfos = new TreeSet<>();
 
     /**
      * 所有被关联的表信息
      */
-    private Set<RelationInfo> beRelatedInfos = new TreeSet<>();
+    private Set<RelInfo> beRelInfos = new TreeSet<>();
 
     /**
      * 所有mapper,service属性名称
@@ -45,7 +45,7 @@ public class XTableInfo extends TableInfo implements Comparable<TableInfo> {
      */
     private Set<XTableInfo> reachable = new HashSet<>();
 
-    private boolean intermediateTable;
+    private boolean midTable;
 
     private boolean dto = false;
 
@@ -63,16 +63,16 @@ public class XTableInfo extends TableInfo implements Comparable<TableInfo> {
 
     private String primaryKeyEntryName;
 
-    public XTableInfo addRelationInfo(RelationInfo relationInfo) {
+    public XTableInfo addRelInfo(RelInfo relationInfo) {
         if (!dto && relationInfo.isMany()) {
             this.dto = true;
         }
-        this.relationInfos.add(relationInfo);
+        this.relInfos.add(relationInfo);
         return this;
     }
 
-    public XTableInfo addBeRelationInfo(RelationInfo beRelatedTableInfo) {
-        this.beRelatedInfos.add(beRelatedTableInfo);
+    public XTableInfo addBeRelInfo(RelInfo beRelatedTableInfo) {
+        this.beRelInfos.add(beRelatedTableInfo);
         return this;
     }
 
@@ -135,12 +135,12 @@ public class XTableInfo extends TableInfo implements Comparable<TableInfo> {
         return this;
     }
 
-    public boolean getHasBeRelationInfo() {
-        return !beRelatedInfos.isEmpty();
+    public boolean getHasBeRelInfo() {
+        return !beRelInfos.isEmpty();
     }
 
-    public boolean getHasRelationInfo() {
-        return !relationInfos.isEmpty();
+    public boolean getHasRelInfo() {
+        return !relInfos.isEmpty();
     }
 
     @Override

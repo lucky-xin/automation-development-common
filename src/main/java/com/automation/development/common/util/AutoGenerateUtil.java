@@ -93,7 +93,7 @@ public class AutoGenerateUtil {
                             switch (dbColumnType) {
                                 case INTEGER:
                                 case LONG:
-                                    if (tableInfo.isIntermediateTable()) {
+                                    if (tableInfo.isMidTable()) {
                                         valuesSql.append("'").append(i + 1).append("'");
                                     } else {
                                         valuesSql.append("'").append(i + 1).append("'");

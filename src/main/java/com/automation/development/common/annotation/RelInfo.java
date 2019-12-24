@@ -11,83 +11,83 @@ import java.lang.annotation.*;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface RelationInfo {
+public @interface RelInfo {
 
     /**
      * 多对多或者一对多关联中间表名称
      */
-    String middleTable() default "";
+    String midTable() default "";
 
     /**
      * 中间表实体类名称如监管机构-学校为SupervisorSchool
      */
-    String middleEntry() default "";
+    String midEntry() default "";
 
     /**
      * 中间表变量名称如监管机构-学校为supervisorSchool
      */
-    String middleProperty() default "";
+    String midProperty() default "";
 
     /**
      * 上一级或者说关联对象在中间表里面的列名。默认[关联表名称+_id]。如监管机构-学校关联关系之中此值为supervisor_id
      */
-    String relationColumn() default "";
+    String relColumn() default "";
 
     /**
      * 保留字段
      * 如表名SupervisorSchool则此字段为supervisor-school
      */
-    String relationUri() default "";
+    String relUri() default "";
 
     /**
      * 上一级或者说关联对象表名。如监管机构-学校关联关系之中此值为supervisor
      */
-    String relationTable();
+    String relTable();
 
     /**
      * 上一级或者说关联对象表的主键列名。
      */
-    String relationTablePk() default "id";
+    String relTablePk() default "id";
 
     /**
      * 上一级或者说关联对象类名。如如监管机构-学校关联关系之中此值为Supervisor
      */
-    String relationEntry() default "";
+    String relEntry() default "";
 
     /**
      * 上一级或者说关联对象变量名。如如监管机构-学校关联关系之中此值为supervisor
      */
-    String relationProperty() default "";
+    String relProperty() default "";
 
     /**
      * 下级或者说被关联对象表名。如如监管机构-学校关联关系之中此值为school
      */
-    String relationToTable();
+    String relToTable();
 
     /**
      * 下级级或者说被关联对象在中间表里面的列名。默认为[被关联表名称+_id]。如监管机构-学校关联关系之中此值为school_id
      */
-    String relationToColumn() default "";
+    String relToColumn() default "";
 
     /**
      * 保留字段
      */
-    String relationToUri() default "";
+    String relToUri() default "";
 
     /**
      * 下级级或者说被关联对象类名称。如监管机构-学校关联关系之中此值为School
      */
-    String relationToEntry() default "";
+    String relToEntry() default "";
 
     /**
      * 下级级或者说被关联对象变量名称。如监管机构-学校关联关系之中此值为school
      */
-    String relationToProperty() default "";
+    String relToProperty() default "";
 
     /**
      * 下级级或者说被关联对象表的主键id
      */
-    String relationToTablePk() default "id";
+    String relToTablePk() default "id";
 
     /**
      * 是否可达。可达表示在当前的对象之中是否能获取到关联对象的详细信息。

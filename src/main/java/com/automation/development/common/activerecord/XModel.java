@@ -1,6 +1,6 @@
 package com.automation.development.common.activerecord;
 
-import com.automation.development.common.annotation.RelationInfo;
+import com.automation.development.common.annotation.RelInfo;
 import com.automation.development.common.model.ModelFactory;
 import com.automation.development.common.service.DistributeIdService;
 import com.automation.development.common.util.FieldHelper;
@@ -62,14 +62,14 @@ public abstract class XModel<T extends XModel<?>> extends Model<T> {
 
         for (Field declaredField : getClass().getDeclaredFields()) {
             TableField tableFieldAnnotation = declaredField.getAnnotation(TableField.class);
-            RelationInfo relationInfo = declaredField.getAnnotation(RelationInfo.class);
+            RelInfo relationInfo = declaredField.getAnnotation(RelInfo.class);
             if (tableFieldAnnotation == null || tableFieldAnnotation.exist() || relationInfo == null) {
                 continue;
             }
-            String relationTable = relationInfo.relationTable();
-            String relationToTable = relationInfo.relationToTable();
-            String relationEntry = StringUtil.isEmpty(relationInfo.relationEntry()) ? FieldHelper.getEntryName(relationTable) : relationInfo.relationEntry();
-            String relationToEntry = StringUtil.isEmpty(relationInfo.relationToEntry()) ? FieldHelper.getEntryName(relationToTable) : relationInfo.relationToEntry();
+            String relationTable = relationInfo.relTable();
+            String relationToTable = relationInfo.relToTable();
+            String relationEntry = StringUtil.isEmpty(relationInfo.relEntry()) ? FieldHelper.getEntryName(relationTable) : relationInfo.relEntry();
+            String relationToEntry = StringUtil.isEmpty(relationInfo.relToEntry()) ? FieldHelper.getEntryName(relationToTable) : relationInfo.relToEntry();
             ExtensionRelationInfo<T> extensionRelationInfo = new ExtensionRelationInfo<T>().setModel(entry).setReachable(relationInfo.isReachable());
 
             Type genericType = declaredField.getGenericType();
@@ -106,31 +106,31 @@ public abstract class XModel<T extends XModel<?>> extends Model<T> {
 
                 if (isCollection) {
                     // 为多对多关系
-                    Assert.notEmpty(relationInfo.middleTable(), "middleTable must not be null.");
-                    String middleEntry = StringUtil.isEmpty(relationInfo.middleEntry()) ?
-                            FieldHelper.getEntryName(relationInfo.middleTable()) : relationInfo.middleEntry();
+                    Assert.notEmpty(relationInfo.midTable(), "middleTable must not be null.");
+                    String middleEntry = StringUtil.isEmpty(relationInfo.midEntry()) ?
+                            FieldHelper.getEntryName(relationInfo.midTable()) : relationInfo.midEntry();
                     Class<?> middleEntryClass = getEntryClass(middleEntry);
                     // 如果没有继承自Model则跳过
                     if (!XModel.class.isAssignableFrom(middleEntryClass)) {
                         continue;
                     }
-                    String middleProperty = StringUtil.isEmpty(relationInfo.middleProperty()) ?
-                            FieldHelper.getPropertyName(relationInfo.middleTable()) : relationInfo.middleProperty();
+                    String middleProperty = StringUtil.isEmpty(relationInfo.midProperty()) ?
+                            FieldHelper.getPropertyName(relationInfo.midTable()) : relationInfo.midProperty();
                     extensionRelationInfo.setMiddleEntryClass((Class<T>) middleEntryClass)
                             .setMiddleEntry(middleEntry)
                             .setMiddleProperty(middleProperty)
-                            .setMiddleTable(relationInfo.middleTable())
+                            .setMiddleTable(relationInfo.midTable())
                             .setMany(true)
                             .setFieldActualClass((Class<T>) fieldActualClass);
                 }
                 declaredField.setAccessible(true);
-                String relationProperty = StringUtil.isEmpty(relationInfo.relationProperty()) ?
-                        FieldHelper.getPropertyName(relationTable) : relationInfo.relationProperty();
+                String relationProperty = StringUtil.isEmpty(relationInfo.relProperty()) ?
+                        FieldHelper.getPropertyName(relationTable) : relationInfo.relProperty();
 
-                String relationToProperty = StringUtil.isEmpty(relationInfo.relationToProperty()) ?
-                        FieldHelper.getPropertyName(relationToTable) : relationInfo.relationToProperty();
-                String relationColumn = StringUtil.isEmpty(relationInfo.relationColumn()) ? relationTable + "_id" : relationInfo.relationColumn();
-                String relationToColumn = StringUtil.isEmpty(relationInfo.relationToColumn()) ? relationToTable + "_id" : relationInfo.relationToColumn();
+                String relationToProperty = StringUtil.isEmpty(relationInfo.relToProperty()) ?
+                        FieldHelper.getPropertyName(relationToTable) : relationInfo.relToProperty();
+                String relationColumn = StringUtil.isEmpty(relationInfo.relColumn()) ? relationTable + "_id" : relationInfo.relColumn();
+                String relationToColumn = StringUtil.isEmpty(relationInfo.relToColumn()) ? relationToTable + "_id" : relationInfo.relToColumn();
                 extensionRelationInfo.setDeclaredField(declaredField)
                         .setRelationEntryClass((Class<T>) relationEntryClass)
                         .setRelationToEntryClass((Class<T>) relationToEntryClass);
@@ -139,12 +139,12 @@ public abstract class XModel<T extends XModel<?>> extends Model<T> {
                         .setRelationEntry(relationEntry)
                         .setRelationProperty(relationProperty)
                         .setRelationColumn(relationColumn)
-                        .setRelationTablePk(relationInfo.relationTablePk())
+                        .setRelationTablePk(relationInfo.relTablePk())
                         .setRelationToTable(relationToTable)
                         .setRelationToEntry(relationToEntry)
                         .setRelationToProperty(relationToProperty)
                         .setRelationToColumn(relationToColumn)
-                        .setRelationToTablePk(relationInfo.relationToTablePk());
+                        .setRelationToTablePk(relationInfo.relToTablePk());
                 consumer.accept(extensionRelationInfo);
             } catch (ClassNotFoundException e) {
                 log.error("找不到class", e);
@@ -393,7 +393,7 @@ public abstract class XModel<T extends XModel<?>> extends Model<T> {
         try {
             Consumer<ExtensionRelationInfo> consumer = (extensionRelationInfo) -> {
                 try {
-                    RelationInfo relationInfo = extensionRelationInfo.getDeclaredField().getAnnotation(RelationInfo.class);
+                    RelInfo relationInfo = extensionRelationInfo.getDeclaredField().getAnnotation(RelInfo.class);
                     if (!relationInfo.deleteRelation()) {
                         return;
                     }

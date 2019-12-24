@@ -42,7 +42,7 @@ public class XTableField extends TableField {
      */
     private List<String> validateAnnotations = new ArrayList<>();
 
-    private String relationLabel;
+    private String relLabel;
 
     /**
      * 按JavaBean规则来生成get和set方法

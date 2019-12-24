@@ -1,8 +1,8 @@
 package com.automation.development.common.util;
 
 import com.automation.development.common.activerecord.XModel;
-import com.automation.development.common.annotation.RelationColumn;
-import com.automation.development.common.annotation.RelationToColumn;
+import com.automation.development.common.annotation.RelColumn;
+import com.automation.development.common.annotation.RelToColumn;
 import com.automation.development.common.service.impl.XServiceImpl;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
@@ -30,7 +30,7 @@ import java.util.function.Function;
  * @Description: 关联关系工具类
  * @date 2019-05-07 17:06
  */
-public class RelationInfoUtil {
+public class RelQueryUtil {
 
     public static <T extends XModel> List<Long> selectPkColumns(IService<T> xService, String selectColumn, String conditionColumn, Object conditionValue) {
         Function<Object, Long> function = (input) -> {
@@ -61,8 +61,8 @@ public class RelationInfoUtil {
         String relationProperty = null;
         String relationToProperty = null;
         for (Field field : fields) {
-            RelationColumn relationColumnAnnotation = field.getAnnotation(RelationColumn.class);
-            RelationToColumn relationToColumnAnnotation = field.getAnnotation(RelationToColumn.class);
+            RelColumn relationColumnAnnotation = field.getAnnotation(RelColumn.class);
+            RelToColumn relationToColumnAnnotation = field.getAnnotation(RelToColumn.class);
             TableField tableField = field.getAnnotation(TableField.class);
             if (tableField != null && !tableField.exist()) {
                 continue;

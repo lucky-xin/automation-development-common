@@ -43,4 +43,14 @@ public class JdbcUtil {
             }
         }
     }
+
+    public static String getDbName(String url) {
+        int startIndex = url.lastIndexOf("/");
+        int endIndex = url.indexOf("?");
+        if (endIndex == -1) {
+            endIndex = url.length();
+        }
+        String dbName = url.substring(startIndex + 1, endIndex);
+        return dbName;
+    }
 }
