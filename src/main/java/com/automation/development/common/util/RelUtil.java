@@ -30,7 +30,7 @@ import java.util.function.Function;
  * @Description: 关联关系工具类
  * @date 2019-05-07 17:06
  */
-public class RelQueryUtil {
+public class RelUtil {
 
     public static <T extends XModel> List<Long> selectPkColumns(IService<T> xService, String selectColumn, String conditionColumn, Object conditionValue) {
         Function<Object, Long> function = (input) -> {
