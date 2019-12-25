@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.auto.development.common.model.*;
 import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.generator.config.rules.DbColumnType;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.xin.utils.StringUtil;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -71,7 +72,8 @@ public class TableHelper {
                 xTableInfo.addField(tableField);
                 continue;
             }
-            XTableField tableField = buildField(getColumnName(declaredField.getName()), DbTypeMapper.getDbColumnType(declaredField.getType()), false);
+            XTableField tableField = buildField(getColumnName(declaredField.getName()),
+                    DbTypeMapper.getDbColumnType(declaredField.getType()), false);
             tableField.setComment(comment);
             xTableInfo.addField(tableField);
 
@@ -81,20 +83,19 @@ public class TableHelper {
     public List<String> getCreateTableSql(XTableInfo tableInfo) {
         switch (tableInfo.getDbType()) {
             case POSTGRE_SQL:
-                return getCreatePgSqlStatements(tableInfo);
+                return getCreatePgSqlSqls(tableInfo);
 
             case MYSQL:
-                return getCreateMySqlStatements(tableInfo);
+                return getCreateMySqlSqls(tableInfo);
 
             default:
                 break;
         }
 
-
         return null;
     }
 
-    private List<String> getCreateMySqlStatements(XTableInfo tableInfo) {
+    private List<String> getCreateMySqlSqls(XTableInfo tableInfo) {
         List<com.baomidou.mybatisplus.generator.config.po.TableField> fields = tableInfo.getFields();
         List<String> result = new ArrayList<>(2 + fields.size());
         StringBuilder deleteTableSql = new StringBuilder("drop table if exists ").append(tableInfo.getName());
@@ -119,6 +120,16 @@ public class TableHelper {
             }
         }
         //没有主键
+        addDefaultPk(tableInfo, idField, primaryKeys, createTableSql);
+        createTableSql.append(String.format("PRIMARY KEY (%s) USING BTREE",
+                StringUtil.collectionToCommaDelimitedList(primaryKeys)))
+                .append(") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC COMMENT='")
+                .append(tableInfo.getComment()).append("';");
+        result.add(createTableSql.toString());
+        return result;
+    }
+
+    private static void addDefaultPk(XTableInfo tableInfo, com.baomidou.mybatisplus.generator.config.po.TableField idField, Set<String> primaryKeys, StringBuilder createTableSql) {
         if (primaryKeys.size() == 0) {
             primaryKeys.add("id");
             createTableSql.append(" id bigint not null,");
@@ -130,15 +141,9 @@ public class TableHelper {
                 tableInfo.setPk(idField);
             }
         }
-        createTableSql.append(String.format("PRIMARY KEY (%s) USING BTREE",
-                StringUtil.collectionToCommaDelimitedList(primaryKeys)))
-                .append(") ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='")
-                .append(tableInfo.getComment()).append("';");
-        result.add(createTableSql.toString());
-        return result;
     }
 
-    public List<String> getCreatePgSqlStatements(XTableInfo tableInfo) {
+    private List<String> getCreatePgSqlSqls(XTableInfo tableInfo) {
         List<com.baomidou.mybatisplus.generator.config.po.TableField> fields = tableInfo.getFields();
         List<String> result = new ArrayList<>(2 + fields.size());
         List<String> commentSqls = new ArrayList<>(fields.size());
@@ -172,17 +177,7 @@ public class TableHelper {
         }
 
         //没有主键
-        if (primaryKeys.size() == 0) {
-            primaryKeys.add("id");
-            createTableSql.append(" id bigint not null,");
-            //没有id字段
-            if (idField == null) {
-                TableHelper.addDefaultPrimaryKey(tableInfo);
-            } else {
-                idField.setColumnType(Constants.PRIMARY_KEY_TYPE);
-                tableInfo.setPk(idField);
-            }
-        }
+        addDefaultPk(tableInfo, idField, primaryKeys, createTableSql);
         createTableSql.append(" CONSTRAINT ")
                 .append(tableName)
                 .append("_pkey PRIMARY KEY (")
@@ -346,7 +341,9 @@ public class TableHelper {
             }
         }
 
+        String comment = fieldName.replace("_", " ");
         tableField.setName(fieldName);
+        tableField.setComment(comment);
         tableField.setPropertyName(getPropertyName(fieldName));
         tableField.setColumnType(dbColumnType);
         tableField.setKeyFlag(keyFlag);
@@ -392,11 +389,11 @@ public class TableHelper {
             ValidateConditionUtil.setMaxLength(tableField, jsonNode);
             ValidateConditionUtil.setMinValue(tableField, jsonNode);
             ValidateConditionUtil.setMaxValue(tableField, jsonNode);
-            ValidateConditionUtil.addValid(tableField, getPropertyName(fieldName), tableField.getValidate());
             JSONArray enumNode = jsonNode.getJSONArray("enum");
             if (enumNode != null) {
                 addEnumInfo(tableField, enumNode);
             }
+            ValidateConditionUtil.addValid(tableField, getPropertyName(fieldName), tableField.getValidate());
         }
         if (tableField.getIsEnumField()) {
             tableField.setColumnType(DbColumnType.INTEGER);
@@ -464,16 +461,14 @@ public class TableHelper {
         return "id".equals(fieldName);
     }
 
-    private Pattern englishTextPattern = Pattern.compile("(^[a-zA-Z]+)");
+    private Pattern englishTextPattern = Pattern.compile("(^[a-zA-Z_0-9]+)");
 
     /**
-     * TODO 枚举类型待处理
-     *
      * @param tableField
      * @param arrayNode
      */
     private void addEnumInfo(XTableField tableField, JSONArray arrayNode) {
-        if (tableField == null || arrayNode == null) {
+        if (arrayNode == null || arrayNode.size() == 0) {
             return;
         }
         Iterator<Object> iterator = arrayNode.iterator();
@@ -481,38 +476,74 @@ public class TableHelper {
         String fieldName = tableField.getName();
         EnumInfo enumInfo = new EnumInfo().setFieldName(fieldName);
         DbColumnType dbColumnType = null;
-//
-//        while (iterator.hasNext()) {
-//            JsonNode element = iterator.next();
-//            EnumField enumField = new EnumField();
-//            if (element.isTextual()) {
-//                String textValue = element.asText();
-//                if (englishTextPattern.matcher(textValue).find()) {
-//                    String entryName = getColumnName(textValue);
-//                    if (StringUtil.isEmpty(entryName)) {
-//                        continue;
-//                    }
-//                    enumField.setFieldName(entryName.toUpperCase()).setFieldValue(textValue).setFieldCode(fields.size() + 1);
-//                    fields.add(enumField);
-//                    dbColumnType = DbColumnType.STRING;
-//                    continue;
-//                }
-//            }
-//
-//            if (element.isInt() || element.isLong()) {
-//                dbColumnType = DbColumnType.LONG;
-//                enumField.setFieldValue(element.asLong(0));
-//            } else if (element.isFloat() || element.isDouble()) {
-//                enumField.setFieldValue(element.asDouble(0));
-//                dbColumnType = DbColumnType.DOUBLE;
-//            }
-//            fields.add(enumField);
-//        }
-//        enumInfo.setValueType(dbColumnType)
-//                .setEntryName(getEntryName(fieldName))
-//                .setPropertyName(getPropertyName(fieldName))
-//                .setFields(fields);
-//        tableField.setEnumInfo(enumInfo);
+        Object first = arrayNode.get(0);
+        boolean fistBaseType = first.getClass().getName().startsWith("java.lang.");
+        boolean fistJsonObject = first instanceof JSONObject;
+
+        boolean isBaseType = fistBaseType;
+        boolean isJsonObject = fistJsonObject;
+        //"^(19|20)$"
+        StringBuilder regexBuild = new StringBuilder("^(");
+        while (iterator.hasNext()) {
+            Object element = iterator.next();
+            if (isJsonObject) {
+                if (!(element instanceof JSONObject)) {
+                    isJsonObject = false;
+                    break;
+                }
+                JSONObject jsonObject = (JSONObject) element;
+                if (jsonObject.size() != 1) {
+                    isJsonObject = false;
+                    break;
+                }
+                Map.Entry<String, Object> entry = jsonObject.entrySet().iterator().next();
+                String textValue = entry.getKey();
+                EnumField enumField = new EnumField();
+                if (englishTextPattern.matcher(textValue).find()) {
+                    String entryName = StringUtil.toString(entry.getValue());
+                    if (StringUtil.isEmpty(entryName)) {
+                        continue;
+                    }
+                    enumField.setFieldName(textValue.toUpperCase())
+                            .setFieldValue(entryName)
+                            .setFieldCode(fields.size() + 1);
+                    dbColumnType = DbColumnType.STRING;
+                    fields.add(enumField);
+                    continue;
+                }
+            }
+            if (isBaseType) {
+                if (!element.getClass().equals(first.getClass())) {
+                    isBaseType = false;
+                    break;
+                }
+                regexBuild.append(element).append("|");
+            }
+        }
+
+        if (fistBaseType && fistBaseType == isBaseType) {
+            for (DbColumnType value : DbColumnType.values()) {
+                if (value.name().equals(first.getClass().getSimpleName().toUpperCase())) {
+                    dbColumnType = value;
+                    break;
+                }
+            }
+            regexBuild.deleteCharAt(regexBuild.length() - 1).append(")$");
+            String regex = regexBuild.toString();
+            ValidateCondition validateCondition = tableField.getValidate();
+            if (StringUtil.isEmpty(validateCondition.getPattern())) {
+                tableField.setColumnType(dbColumnType);
+                validateCondition.setPattern(regex);
+            }
+        }
+
+        if (fistJsonObject && isJsonObject == fistJsonObject) {
+            enumInfo.setValueType(dbColumnType)
+                    .setEntryName(getEntryName(fieldName))
+                    .setPropertyName(getPropertyName(fieldName))
+                    .setFields(fields);
+            tableField.setEnumInfo(enumInfo);
+        }
     }
 
     private Pattern commentPattern = Pattern.compile("(^[\bThe\b.*\bSchema\b])");
@@ -674,6 +705,10 @@ public class TableHelper {
      */
     public RelInfo buildN2NRel(String relTable, String relColumn, String relToTable, String relToColumn) {
         return buildRel(true, relTable, relColumn, relToTable, relToColumn, getMidTableName(relTable, relToTable));
+    }
+
+    public RelInfo buildN2NRel(String relTable, String relColumn, String relToTable, String relToColumn, String midTableName) {
+        return buildRel(true, relTable, relColumn, relToTable, relToColumn, midTableName);
     }
 
 

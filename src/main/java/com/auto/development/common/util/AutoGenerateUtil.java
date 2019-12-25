@@ -35,7 +35,7 @@ public class AutoGenerateUtil {
         return result;
     }
 
-    public static List<String> generatePgSQLDataSqls(int size, Map<String, XTableInfo> tableInfos) {
+    public static List<String> genSQLDataSqls(int size, Map<String, XTableInfo> tableInfos) {
         List<String> generatePgSQLDataSqls = new ArrayList<>(tableInfos.size());
         Iterator<Map.Entry<String, XTableInfo>> iterator = tableInfos.entrySet().iterator();
         while (iterator.hasNext()) {
@@ -105,6 +105,7 @@ public class AutoGenerateUtil {
                                 case BOOLEAN:
                                     valuesSql.append("'").append(false).append("'");
                                     break;
+                                case DATE:
                                 case TIMESTAMP:
                                     valuesSql.append("'").append(DateUtil.format(new Date())).append("'");
                                     break;
