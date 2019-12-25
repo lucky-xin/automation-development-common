@@ -95,10 +95,10 @@ public @interface RelInfo {
      * 如果两个关联的对象要拿互相获取到对方的详细信息就会进入无限循环之中，因此用isReachable来控制。
      * isReachable为true则能获取到该关联对象所有关联信息。否则只能获取到基本信息
      */
-    boolean isReachable() default true;
+    boolean reachable() default true;
 
     /**
      * 当执行删除操作时是否删除此关联关系
      */
-    boolean deleteRelation() default true;
+    boolean delRel() default true;
 }

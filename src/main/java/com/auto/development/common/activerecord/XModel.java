@@ -56,26 +56,26 @@ public abstract class XModel<T extends XModel<?>> extends Model<T> {
         return tableName;
     }
 
-    private void handle(XModel<T> entry, Consumer<ExtensionRelationInfo> consumer) {
+    private void handle(XModel<T> entry, Consumer<ExtRelInfo> consumer) {
 
         String tableName = getTableName();
 
         for (Field declaredField : getClass().getDeclaredFields()) {
             TableField tableFieldAnnotation = declaredField.getAnnotation(TableField.class);
-            RelInfo relationInfo = declaredField.getAnnotation(RelInfo.class);
-            if (tableFieldAnnotation == null || tableFieldAnnotation.exist() || relationInfo == null) {
+            RelInfo relInfo = declaredField.getAnnotation(RelInfo.class);
+            if (tableFieldAnnotation == null || tableFieldAnnotation.exist() || relInfo == null) {
                 continue;
             }
-            String relationTable = relationInfo.relTable();
-            String relationToTable = relationInfo.relToTable();
-            String relationEntry = StringUtil.isEmpty(relationInfo.relEntry()) ? FieldHelper.getEntryName(relationTable) : relationInfo.relEntry();
-            String relationToEntry = StringUtil.isEmpty(relationInfo.relToEntry()) ? FieldHelper.getEntryName(relationToTable) : relationInfo.relToEntry();
-            ExtensionRelationInfo<T> extensionRelationInfo = new ExtensionRelationInfo<T>().setModel(entry).setReachable(relationInfo.isReachable());
+            String reTable = relInfo.relTable();
+            String relToTable = relInfo.relToTable();
+            String relEntry = StringUtil.isEmpty(relInfo.relEntry()) ? FieldHelper.getEntryName(reTable) : relInfo.relEntry();
+            String relToEntry = StringUtil.isEmpty(relInfo.relToEntry()) ? FieldHelper.getEntryName(relToTable) : relInfo.relToEntry();
+            ExtRelInfo<T> extRelInfo = new ExtRelInfo<T>().setModel(entry).setReachable(relInfo.reachable());
 
             Type genericType = declaredField.getGenericType();
             try {
-                Class<?> relationEntryClass = null;
-                Class<?> relationToEntryClass = null;
+                Class<?> relEntryClass = null;
+                Class<?> relToEntryClass = null;
                 Class<?> fieldActualClass = declaredField.getType();
                 boolean isCollection = Collection.class.isAssignableFrom(declaredField.getType());
                 if (isCollection && (genericType instanceof ParameterizedType)) {
@@ -90,62 +90,62 @@ public abstract class XModel<T extends XModel<?>> extends Model<T> {
                     fieldActualClass = (Class<?>) types[0];
                 }
 
-                if (tableName.equals(relationTable)) {
-                    relationEntryClass = getClass();
-                    relationToEntryClass = fieldActualClass;
+                if (tableName.equals(reTable)) {
+                    relEntryClass = getClass();
+                    relToEntryClass = fieldActualClass;
                 } else {
-                    relationToEntryClass = getClass();
-                    relationEntryClass = fieldActualClass;
+                    relToEntryClass = getClass();
+                    relEntryClass = fieldActualClass;
                 }
 
                 // 如果没有继承自Model则跳过
-                if (!(XModel.class.isAssignableFrom(relationToEntryClass)
-                        && XModel.class.isAssignableFrom(relationEntryClass))) {
+                if (!(XModel.class.isAssignableFrom(relToEntryClass)
+                        && XModel.class.isAssignableFrom(relEntryClass))) {
                     continue;
                 }
 
                 if (isCollection) {
                     // 为多对多关系
-                    Assert.notEmpty(relationInfo.midTable(), "middleTable must not be null.");
-                    String middleEntry = StringUtil.isEmpty(relationInfo.midEntry()) ?
-                            FieldHelper.getEntryName(relationInfo.midTable()) : relationInfo.midEntry();
+                    Assert.notEmpty(relInfo.midTable(), "middleTable must not be null.");
+                    String middleEntry = StringUtil.isEmpty(relInfo.midEntry()) ?
+                            FieldHelper.getEntryName(relInfo.midTable()) : relInfo.midEntry();
                     Class<?> middleEntryClass = getEntryClass(middleEntry);
                     // 如果没有继承自Model则跳过
                     if (!XModel.class.isAssignableFrom(middleEntryClass)) {
                         continue;
                     }
-                    String middleProperty = StringUtil.isEmpty(relationInfo.midProperty()) ?
-                            FieldHelper.getPropertyName(relationInfo.midTable()) : relationInfo.midProperty();
-                    extensionRelationInfo.setMiddleEntryClass((Class<T>) middleEntryClass)
-                            .setMiddleEntry(middleEntry)
-                            .setMiddleProperty(middleProperty)
-                            .setMiddleTable(relationInfo.midTable())
+                    String middleProperty = StringUtil.isEmpty(relInfo.midProperty()) ?
+                            FieldHelper.getPropertyName(relInfo.midTable()) : relInfo.midProperty();
+                    extRelInfo.setMidEntryClass((Class<T>) middleEntryClass)
+                            .setMidEntry(middleEntry)
+                            .setMidProperty(middleProperty)
+                            .setMidTable(relInfo.midTable())
                             .setMany(true)
                             .setFieldActualClass((Class<T>) fieldActualClass);
                 }
                 declaredField.setAccessible(true);
-                String relationProperty = StringUtil.isEmpty(relationInfo.relProperty()) ?
-                        FieldHelper.getPropertyName(relationTable) : relationInfo.relProperty();
+                String relProperty = StringUtil.isEmpty(relInfo.relProperty()) ?
+                        FieldHelper.getPropertyName(reTable) : relInfo.relProperty();
 
-                String relationToProperty = StringUtil.isEmpty(relationInfo.relToProperty()) ?
-                        FieldHelper.getPropertyName(relationToTable) : relationInfo.relToProperty();
-                String relationColumn = StringUtil.isEmpty(relationInfo.relColumn()) ? relationTable + "_id" : relationInfo.relColumn();
-                String relationToColumn = StringUtil.isEmpty(relationInfo.relToColumn()) ? relationToTable + "_id" : relationInfo.relToColumn();
-                extensionRelationInfo.setDeclaredField(declaredField)
-                        .setRelationEntryClass((Class<T>) relationEntryClass)
-                        .setRelationToEntryClass((Class<T>) relationToEntryClass);
+                String relToProperty = StringUtil.isEmpty(relInfo.relToProperty()) ?
+                        FieldHelper.getPropertyName(relToTable) : relInfo.relToProperty();
+                String relColumn = StringUtil.isEmpty(relInfo.relColumn()) ? reTable + "_id" : relInfo.relColumn();
+                String relToColumn = StringUtil.isEmpty(relInfo.relToColumn()) ? relToTable + "_id" : relInfo.relToColumn();
+                extRelInfo.setDeclaredField(declaredField)
+                        .setRelEntryClass((Class<T>) relEntryClass)
+                        .setRelToEntryClass((Class<T>) relToEntryClass);
 
-                extensionRelationInfo.setRelationTable(relationTable)
-                        .setRelationEntry(relationEntry)
-                        .setRelationProperty(relationProperty)
-                        .setRelationColumn(relationColumn)
-                        .setRelationTablePk(relationInfo.relTablePk())
-                        .setRelationToTable(relationToTable)
-                        .setRelationToEntry(relationToEntry)
-                        .setRelationToProperty(relationToProperty)
-                        .setRelationToColumn(relationToColumn)
-                        .setRelationToTablePk(relationInfo.relToTablePk());
-                consumer.accept(extensionRelationInfo);
+                extRelInfo.setRelTable(reTable)
+                        .setRelEntry(relEntry)
+                        .setRelProperty(relProperty)
+                        .setRelColumn(relColumn)
+                        .setRelTablePk(relInfo.relTablePk())
+                        .setRelToTable(relToTable)
+                        .setRelToEntry(relToEntry)
+                        .setRelToProperty(relToProperty)
+                        .setRelToColumn(relToColumn)
+                        .setRelToTablePk(relInfo.relToTablePk());
+                consumer.accept(extRelInfo);
             } catch (ClassNotFoundException e) {
                 log.error("找不到class", e);
             }
@@ -177,8 +177,8 @@ public abstract class XModel<T extends XModel<?>> extends Model<T> {
         try {
             XModel<T> xModel = this;
             addPrimaryKey(xModel, distributeIdService);
-            Consumer<ExtensionRelationInfo> consumer = (extensionRelationInfo) -> {
-                Field declaredField = extensionRelationInfo.getDeclaredField();
+            Consumer<ExtRelInfo> consumer = (extRelInfo) -> {
+                Field declaredField = extRelInfo.getDeclaredField();
                 // 为Collection泛型成员
                 try {
                     // 获取关联成员变量的值
@@ -189,29 +189,29 @@ public abstract class XModel<T extends XModel<?>> extends Model<T> {
                         return;
                     }
 
-                    if (extensionRelationInfo.getIsMany()) {
+                    if (extRelInfo.getIsMany()) {
                         // 此model关联其他多个model
-                        boolean isRelationToEntry = extensionRelationInfo.getFieldActualClass()
-                                .equals(extensionRelationInfo.getRelationToEntryClass());
+                        boolean isRelationToEntry = extRelInfo.getFieldActualClass()
+                                .equals(extRelInfo.getRelToEntryClass());
                         Collection<T> entityList = (Collection<T>) fieldValue;
                         // 把成员对象存入数据库
                         save(distributeIdService, entityList);
                         // 获取关联对象id，并插入中间表
                         Set<Serializable> ids = entityList.stream().map(item -> item.pkVal()).collect(Collectors.toSet());
-                        String relationToEntry = extensionRelationInfo.getRelationEntry();
-                        String relationEntry = extensionRelationInfo.getRelationToEntry();
+                        String relToEntry = extRelInfo.getRelEntry();
+                        String relEntry = extRelInfo.getRelToEntry();
                         if (isRelationToEntry) {
-                            relationEntry = extensionRelationInfo.getRelationEntry();
-                            relationToEntry = extensionRelationInfo.getRelationToEntry();
+                            relEntry = extRelInfo.getRelEntry();
+                            relToEntry = extRelInfo.getRelToEntry();
                         }
                         // 反射获取中间表关联id创建关联关系对象
-                        Class<T> middleEntryClass = extensionRelationInfo.getMiddleEntryClass();
-                        Method method1 = ModelFactory.getInstance().getMethod(middleEntryClass, "set" + relationEntry + "Id", Long.class);
-                        Method method2 = ModelFactory.getInstance().getMethod(middleEntryClass, "set" + relationToEntry + "Id", Long.class);
+                        Class<T> midEntryClass = extRelInfo.getMidEntryClass();
+                        Method method1 = ModelFactory.getInstance().getMethod(midEntryClass, "set" + relEntry + "Id", Long.class);
+                        Method method2 = ModelFactory.getInstance().getMethod(midEntryClass, "set" + relToEntry + "Id", Long.class);
                         List<T> middleModels = new ArrayList<>(ids.size());
                         Object[] args = new Object[]{xModel.pkVal()};
                         for (Serializable id : ids) {
-                            T middleModel = middleEntryClass.newInstance();
+                            T middleModel = midEntryClass.newInstance();
                             method1.invoke(middleModel, args);
                             Object[] params = new Object[]{id};
                             method2.invoke(middleModel, params);
@@ -219,7 +219,7 @@ public abstract class XModel<T extends XModel<?>> extends Model<T> {
                         }
                         save(distributeIdService, middleModels);
                     } else if (XModel.class.isAssignableFrom(declaredField.getType())) {
-                        if (getClass().getSimpleName().equals(extensionRelationInfo.getRelationEntry())) {
+                        if (getClass().getSimpleName().equals(extRelInfo.getRelEntry())) {
                             // 此model关联其他1个model
                             String methodName = BeanUtil.getSetMethodName(declaredField.getName() + "Id");
                             Method setFieldIdMethod = ModelFactory.getInstance().getMethod(getClass(), methodName, Long.class);
@@ -280,11 +280,11 @@ public abstract class XModel<T extends XModel<?>> extends Model<T> {
      * 给查询添加关联关系成员
      */
     public void addRelationInfo() {
-        Consumer<ExtensionRelationInfo> consumer = (extensionRelationInfo) -> {
-            Field declaredField = extensionRelationInfo.getDeclaredField();
+        Consumer<ExtRelInfo> consumer = (extRelInfo) -> {
+            Field declaredField = extRelInfo.getDeclaredField();
             String setMethodName = BeanUtil.getSetMethodName(declaredField.getName());
-            boolean isRelationEntry = getClass().equals(extensionRelationInfo.getRelationEntryClass());
-            if (!isRelationEntry && !getClass().equals(extensionRelationInfo.getRelationToEntryClass())) {
+            boolean isRelationEntry = getClass().equals(extRelInfo.getRelEntryClass());
+            if (!isRelationEntry && !getClass().equals(extRelInfo.getRelToEntryClass())) {
                 return;
             }
             try {
@@ -303,28 +303,28 @@ public abstract class XModel<T extends XModel<?>> extends Model<T> {
                             || !XModel.class.isAssignableFrom((Class<?>) types[0])) {
                         return;
                     }
-                    String middleTableName = extensionRelationInfo.getMiddleTable();
+                    String middleTableName = extRelInfo.getMidTable();
                     // 此对象被declaredField关联
-                    String selectedColumn = extensionRelationInfo.getRelationColumn();
-                    String conditionColumn = extensionRelationInfo.getRelationToColumn();
-                    Class<T> entryClass = extensionRelationInfo.getRelationEntryClass();
-                    String entryTablePk = extensionRelationInfo.getRelationTablePk();
+                    String selectedColumn = extRelInfo.getRelColumn();
+                    String conditionColumn = extRelInfo.getRelToColumn();
+                    Class<T> entryClass = extRelInfo.getRelEntryClass();
+                    String entryTablePk = extRelInfo.getRelTablePk();
 
                     if (isRelationEntry) {
                         // 此对象关联declaredField
-                        selectedColumn = extensionRelationInfo.getRelationToColumn();
-                        conditionColumn = extensionRelationInfo.getRelationColumn();
-                        entryClass = extensionRelationInfo.getRelationToEntryClass();
-                        entryTablePk = extensionRelationInfo.getRelationToTablePk();
+                        selectedColumn = extRelInfo.getRelToColumn();
+                        conditionColumn = extRelInfo.getRelColumn();
+                        entryClass = extRelInfo.getRelToEntryClass();
+                        entryTablePk = extRelInfo.getRelToTablePk();
                     }
                     String sql = String.format("SELECT %s FROM %s where %s = {0}", selectedColumn, middleTableName, conditionColumn);
-                    List<Object> ids = SqlRunner.db(extensionRelationInfo.getMiddleEntryClass()).selectObjs(sql, this.primaryKey());
+                    List<Object> ids = SqlRunner.db(extRelInfo.getMidEntryClass()).selectObjs(sql, this.primaryKey());
                     if (CollectionUtil.isEmpty(ids)) {
                         return;
                     }
                     XModel entryModel = ModelFactory.getInstance().getObject(entryClass);
                     // 根据中间表获取被关联对象id
-                    if (extensionRelationInfo.isReachable()) {
+                    if (extRelInfo.isReachable()) {
                         List<Object> result = new ArrayList<>(ids.size());
                         for (Object primaryKey : ids) {
                             if (primaryKey == null) {
@@ -337,16 +337,17 @@ public abstract class XModel<T extends XModel<?>> extends Model<T> {
                         //根据被关联的id批量查询
                         fieldValue = entryModel.selectList(Wrappers.query().in(entryTablePk, ids));
                     }
-                } else if (declaredField.getName().equals(extensionRelationInfo.getRelationToProperty())) {
+                } else if (declaredField.getName().equals(extRelInfo.getRelToProperty())) {
                     // 为1对1 关联关系
-                    XModel relationToEntryModel = (XModel) ModelFactory.getInstance().getObject(extensionRelationInfo.getRelationToEntryClass());
-                    Method getMethod = ModelFactory.getInstance().getMethod(getClass(), BeanUtil.getGetMethodName(extensionRelationInfo.getRelationToProperty() + "Id"));
-                    Serializable relationToPkValue = (Serializable) getMethod.invoke(extensionRelationInfo.getModel());
+                    XModel relationToEntryModel = (XModel) ModelFactory.getInstance().getObject(extRelInfo.getRelToEntryClass());
+                    Method getMethod = ModelFactory.getInstance().getMethod(getClass(),
+                            BeanUtil.getGetMethodName(extRelInfo.getRelToProperty() + "Id"));
+                    Serializable relationToPkValue = (Serializable) getMethod.invoke(extRelInfo.getModel());
                     if (relationToPkValue != null) {
-                        if (extensionRelationInfo.isReachable()) {
+                        if (extRelInfo.isReachable()) {
                             fieldValue = relationToEntryModel.selectById(relationToPkValue);
                         } else {
-                            TableInfo tableInfo = SqlHelper.table(extensionRelationInfo.getRelationToEntryClass());
+                            TableInfo tableInfo = SqlHelper.table(extRelInfo.getRelToEntryClass());
                             fieldValue = relationToEntryModel.selectOne(Wrappers.query().eq(tableInfo.getKeyColumn(), relationToPkValue));
                         }
                     }
@@ -355,10 +356,10 @@ public abstract class XModel<T extends XModel<?>> extends Model<T> {
                     if (Set.class.isAssignableFrom(declaredField.getType())) {
                         Set<T> entrySet = new HashSet<>((Collection) fieldValue);
                         Object[] args = new Object[]{entrySet};
-                        setMethod.invoke(extensionRelationInfo.getModel(), args);
+                        setMethod.invoke(extRelInfo.getModel(), args);
                     } else {
                         Object[] args = new Object[]{fieldValue};
-                        setMethod.invoke(extensionRelationInfo.getModel(), args);
+                        setMethod.invoke(extRelInfo.getModel(), args);
                     }
                 }
             } catch (NoSuchMethodException e) {
@@ -391,30 +392,30 @@ public abstract class XModel<T extends XModel<?>> extends Model<T> {
     public boolean deleteById(Serializable id) {
         SqlSession sqlSession = sqlSession();
         try {
-            Consumer<ExtensionRelationInfo> consumer = (extensionRelationInfo) -> {
+            Consumer<ExtRelInfo> consumer = (extRelInfo) -> {
                 try {
-                    RelInfo relationInfo = extensionRelationInfo.getDeclaredField().getAnnotation(RelInfo.class);
-                    if (!relationInfo.deleteRelation()) {
+                    RelInfo relationInfo = extRelInfo.getDeclaredField().getAnnotation(RelInfo.class);
+                    if (!relationInfo.delRel()) {
                         return;
                     }
 
-                    if (Collection.class.isAssignableFrom(extensionRelationInfo.getDeclaredField().getType())) {
-                        boolean isRelationEntry = getClass().equals(extensionRelationInfo.getRelationEntryClass());
-                        if (!isRelationEntry && !getClass().equals(extensionRelationInfo.getRelationToEntryClass())) {
+                    if (Collection.class.isAssignableFrom(extRelInfo.getDeclaredField().getType())) {
+                        boolean isRelationEntry = getClass().equals(extRelInfo.getRelEntryClass());
+                        if (!isRelationEntry && !getClass().equals(extRelInfo.getRelToEntryClass())) {
                             return;
                         }
-                        String conditionColumn = extensionRelationInfo.getRelationToColumn();
-                        String selectedColumn = extensionRelationInfo.getRelationColumn();
-                        Class<T> entryClass = extensionRelationInfo.getRelationEntryClass();
+                        String conditionColumn = extRelInfo.getRelToColumn();
+                        String selectedColumn = extRelInfo.getRelColumn();
+                        Class<T> entryClass = extRelInfo.getRelEntryClass();
                         if (isRelationEntry) {
                             // 该成员为被此model关联
-                            conditionColumn = extensionRelationInfo.getRelationColumn();
-                            selectedColumn = extensionRelationInfo.getRelationToColumn();
-                            entryClass = extensionRelationInfo.getRelationToEntryClass();
+                            conditionColumn = extRelInfo.getRelColumn();
+                            selectedColumn = extRelInfo.getRelToColumn();
+                            entryClass = extRelInfo.getRelToEntryClass();
                         }
                         // 根据中间表获取关联id
-                        String sql = String.format("SELECT %s FROM %s where %s = {0}", selectedColumn, extensionRelationInfo.getMiddleTable(), conditionColumn);
-                        Class<?> middleEntryClass = extensionRelationInfo.getMiddleEntryClass();
+                        String sql = String.format("SELECT %s FROM %s where %s = {0}", selectedColumn, extRelInfo.getMidTable(), conditionColumn);
+                        Class<?> middleEntryClass = extRelInfo.getMidEntryClass();
                         List<Object> ids = SqlRunner.db(middleEntryClass).selectObjs(sql, id);
                         // 删除中间表数据
                         delete(middleEntryClass, sqlSession, SqlMethod.DELETE, Wrappers.query().eq(conditionColumn, id));
@@ -424,12 +425,12 @@ public abstract class XModel<T extends XModel<?>> extends Model<T> {
                         // 删除关联对象信息
                         XModel model = ModelFactory.getInstance().getObject(entryClass);
                         ids.forEach(pk -> model.deleteById((Serializable) pk));
-                    } else if (!extensionRelationInfo.getIsMany() && extensionRelationInfo.getDeclaredField().getType().equals(extensionRelationInfo.getDeclaredField().getGenericType())) {
-                        if (getClass().getSimpleName().equals(extensionRelationInfo.getRelationEntry())) {
-                            Method getMethod = ModelFactory.getInstance().getMethod(getClass(), BeanUtil.getGetMethodName(extensionRelationInfo.getRelationToProperty() + "Id"));
-                            Serializable relationToPkValue = (Serializable) getMethod.invoke(extensionRelationInfo.getModel());
+                    } else if (!extRelInfo.getIsMany() && extRelInfo.getDeclaredField().getType().equals(extRelInfo.getDeclaredField().getGenericType())) {
+                        if (getClass().getSimpleName().equals(extRelInfo.getRelEntry())) {
+                            Method getMethod = ModelFactory.getInstance().getMethod(getClass(), BeanUtil.getGetMethodName(extRelInfo.getRelToProperty() + "Id"));
+                            Serializable relationToPkValue = (Serializable) getMethod.invoke(extRelInfo.getModel());
                             if (relationToPkValue != null) {
-                                XModel model = (XModel) ModelFactory.getInstance().getObject(extensionRelationInfo.getRelationToEntryClass());
+                                XModel model = (XModel) ModelFactory.getInstance().getObject(extRelInfo.getRelToEntryClass());
                                 model.deleteById(relationToPkValue);
                             }
                         }

@@ -51,7 +51,7 @@ public class TableHelper {
         for (Field declaredField : clazz.getDeclaredFields()) {
             TableField tableFieldAnnotation = declaredField.getAnnotation(TableField.class);
             TableId tableId = declaredField.getAnnotation(TableId.class);
-            boolean shouldSkip = declaredField.getName().equals("serialVersionUID" )
+            boolean shouldSkip = declaredField.getName().equals("serialVersionUID")
                     || (tableId == null && (tableFieldAnnotation != null && !tableFieldAnnotation.exist()));
             if (shouldSkip) {
                 continue;
@@ -97,11 +97,11 @@ public class TableHelper {
     private List<String> getCreateMySqlStatements(XTableInfo tableInfo) {
         List<com.baomidou.mybatisplus.generator.config.po.TableField> fields = tableInfo.getFields();
         List<String> result = new ArrayList<>(2 + fields.size());
-        StringBuilder deleteTableSql = new StringBuilder("drop table if exists " ).append(tableInfo.getName());
+        StringBuilder deleteTableSql = new StringBuilder("drop table if exists ").append(tableInfo.getName());
         result.add(deleteTableSql.toString());
         com.baomidou.mybatisplus.generator.config.po.TableField idField = null;
         Set<String> primaryKeys = new HashSet<>();
-        StringBuilder createTableSql = new StringBuilder("CREATE TABLE " ).append(tableInfo.getName()).append(" (" );
+        StringBuilder createTableSql = new StringBuilder("CREATE TABLE ").append(tableInfo.getName()).append(" (");
         for (com.baomidou.mybatisplus.generator.config.po.TableField field : fields) {
             String fieldName = field.getName();
             if (field.getColumnType() instanceof DbColumnType) {
@@ -111,17 +111,17 @@ public class TableHelper {
             }
             if (field.isKeyFlag()) {
                 primaryKeys.add(fieldName);
-                createTableSql.append(" not null" );
+                createTableSql.append(" not null");
             }
-            createTableSql.append(" COMMENT '" ).append(field.getComment()).append("'," );
+            createTableSql.append(" COMMENT '").append(field.getComment()).append("',");
             if ("id".equals(fieldName)) {
                 idField = field;
             }
         }
         //没有主键
         if (primaryKeys.size() == 0) {
-            primaryKeys.add("id" );
-            createTableSql.append(" id bigint not null," );
+            primaryKeys.add("id");
+            createTableSql.append(" id bigint not null,");
             //没有id字段
             if (idField == null) {
                 TableHelper.addDefaultPrimaryKey(tableInfo);
@@ -130,10 +130,10 @@ public class TableHelper {
                 tableInfo.setPk(idField);
             }
         }
-        createTableSql.append(String.format("PRIMARY KEY (%s) USING BTREE" ,
+        createTableSql.append(String.format("PRIMARY KEY (%s) USING BTREE",
                 StringUtil.collectionToCommaDelimitedList(primaryKeys)))
-                .append(") ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='" )
-                .append(tableInfo.getComment()).append("';" );
+                .append(") ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='")
+                .append(tableInfo.getComment()).append("';");
         result.add(createTableSql.toString());
         return result;
     }
@@ -143,10 +143,10 @@ public class TableHelper {
         List<String> result = new ArrayList<>(2 + fields.size());
         List<String> commentSqls = new ArrayList<>(fields.size());
         String tableName = tableInfo.getName();
-        StringBuilder deleteTableSql = new StringBuilder("drop table if exists " ).append(tableName);
+        StringBuilder deleteTableSql = new StringBuilder("drop table if exists ").append(tableName);
         result.add(deleteTableSql.toString());
         StringBuilder createTableSql = new StringBuilder();
-        createTableSql.append("CREATE TABLE " ).append(tableName).append("(" );
+        createTableSql.append("CREATE TABLE ").append(tableName).append("(");
         Set<String> primaryKeys = new HashSet<>();
         com.baomidou.mybatisplus.generator.config.po.TableField idField = null;
 
@@ -158,13 +158,13 @@ public class TableHelper {
                 createTableSql.append(fieldName).append(DbTypeMapper.getPgSqlType(dbColumnType));
                 if (field.isKeyFlag()) {
                     primaryKeys.add(fieldName);
-                    createTableSql.append(" not null" );
+                    createTableSql.append(" not null");
                 }
 
                 if (!StringUtil.isEmpty(field.getComment())) {
                     commentSqls.add(TableHelper.getAddCommentSql(tableName, fieldName, field.getComment()));
                 }
-                createTableSql.append("," );
+                createTableSql.append(",");
                 if ("id".equals(fieldName)) {
                     idField = field;
                 }
@@ -173,8 +173,8 @@ public class TableHelper {
 
         //没有主键
         if (primaryKeys.size() == 0) {
-            primaryKeys.add("id" );
-            createTableSql.append(" id bigint not null," );
+            primaryKeys.add("id");
+            createTableSql.append(" id bigint not null,");
             //没有id字段
             if (idField == null) {
                 TableHelper.addDefaultPrimaryKey(tableInfo);
@@ -183,16 +183,16 @@ public class TableHelper {
                 tableInfo.setPk(idField);
             }
         }
-        createTableSql.append(" CONSTRAINT " )
+        createTableSql.append(" CONSTRAINT ")
                 .append(tableName)
-                .append("_pkey PRIMARY KEY (" )
-                .append(StringUtil.collectionToCommaDelimitedList(primaryKeys)).append(")" );
-        createTableSql.append(")" );
+                .append("_pkey PRIMARY KEY (")
+                .append(StringUtil.collectionToCommaDelimitedList(primaryKeys)).append(")");
+        createTableSql.append(")");
         result.add(createTableSql.toString());
         //comment on table user is 'Our session logs';
-        StringBuilder tableComment = new StringBuilder("comment on table " )
-                .append(tableName).append(" is '" )
-                .append(getTableComment(tableInfo)).append("'" );
+        StringBuilder tableComment = new StringBuilder("comment on table ")
+                .append(tableName).append(" is '")
+                .append(getTableComment(tableInfo)).append("'");
         result.add(tableComment.toString());
         result.addAll(commentSqls);
         return result;
@@ -222,12 +222,12 @@ public class TableHelper {
                 break;
 
         }
-        String sql = String.format(" ADD COLUMN %s %s" , field.getName(), type);
+        String sql = String.format(" ADD COLUMN %s %s", field.getName(), type);
         return sql;
     }
 
     public String getAddCommentSql(String tableName, String fieldName, String comment) {
-        String sql = String.format(" comment on column %s.%s is '%s'" , tableName, fieldName, comment);
+        String sql = String.format(" comment on column %s.%s is '%s'", tableName, fieldName, comment);
         return sql;
     }
 
@@ -268,7 +268,7 @@ public class TableHelper {
         if (jsonNode == null) {
             return false;
         }
-        String text = jsonNode.getString("isPrimaryKey" );
+        String text = jsonNode.getString("isPrimaryKey");
         return "true".equals(text);
     }
 
@@ -393,7 +393,7 @@ public class TableHelper {
             ValidateConditionUtil.setMinValue(tableField, jsonNode);
             ValidateConditionUtil.setMaxValue(tableField, jsonNode);
             ValidateConditionUtil.addValid(tableField, getPropertyName(fieldName), tableField.getValidate());
-            JSONArray enumNode = jsonNode.getJSONArray("enum" );
+            JSONArray enumNode = jsonNode.getJSONArray("enum");
             if (enumNode != null) {
                 addEnumInfo(tableField, enumNode);
             }
@@ -405,7 +405,7 @@ public class TableHelper {
     }
 
     public void addDefaultPrimaryKey(XTableInfo tableInfo) {
-        XTableField idField = buildField("id" , Constants.PRIMARY_KEY_TYPE, true);
+        XTableField idField = buildField("id", Constants.PRIMARY_KEY_TYPE, true);
         tableInfo.addField(idField);
         tableInfo.setPk(idField);
     }
@@ -429,10 +429,10 @@ public class TableHelper {
             return DbColumnType.TIMESTAMP;
         }
         DbColumnType dbColumnType = DbColumnType.STRING;
-        if (jsonNode == null || jsonNode.get("type" ) == null) {
+        if (jsonNode == null || jsonNode.get("type") == null) {
             return dbColumnType;
         }
-        String type = jsonNode.getString("type" );
+        String type = jsonNode.getString("type");
         return getDbColumnType(type);
     }
 
@@ -464,7 +464,7 @@ public class TableHelper {
         return "id".equals(fieldName);
     }
 
-    private Pattern englishTextPattern = Pattern.compile("(^[a-zA-Z]+)" );
+    private Pattern englishTextPattern = Pattern.compile("(^[a-zA-Z]+)");
 
     /**
      * TODO 枚举类型待处理
@@ -515,7 +515,7 @@ public class TableHelper {
 //        tableField.setEnumInfo(enumInfo);
     }
 
-    private Pattern commentPattern = Pattern.compile("(^[\bThe\b.*\bSchema\b])" );
+    private Pattern commentPattern = Pattern.compile("(^[\bThe\b.*\bSchema\b])");
 
     private boolean isParentId(String fieldName) {
         return "parentId".equals(fieldName) || "parent_id".equals(fieldName);
@@ -525,21 +525,21 @@ public class TableHelper {
         if (jsonNode == null) {
             if (!StringUtil.isEmpty(fieldName)) {
                 fieldName = getColumnName(fieldName);
-                return fieldName.replace("_" , " " );
+                return fieldName.replace("_", " ");
             }
             return "";
         }
 
-        String title = jsonNode.getString("title" );
+        String title = jsonNode.getString("title");
         if (title == null) {
             return "";
         }
         if (commentPattern.matcher(title).find()) {
             if (StringUtil.isEmpty(fieldName)) {
-                return title.replace("The" , "" )
-                        .replace("Schema" , "" ).trim();
+                return title.replace("The", "")
+                        .replace("Schema", "").trim();
             }
-            return fieldName.replace("_" , " " );
+            return fieldName.replace("_", " ");
         }
         return title;
     }
@@ -553,7 +553,7 @@ public class TableHelper {
     public String getComment(String fieldName) {
         if (!StringUtil.isEmpty(fieldName)) {
             fieldName = getColumnName(fieldName);
-            return fieldName.replace("_" , " " );
+            return fieldName.replace("_", " ");
         }
         return "";
     }
@@ -568,7 +568,7 @@ public class TableHelper {
         if (StringUtil.isEmpty(fieldName)) {
             return "";
         }
-        if (fieldName.contains("_" )) {
+        if (fieldName.contains("_")) {
             fieldName = StringUtil.underlineToLowerCamel(fieldName);
         }
         return StringUtil.upperCaseFirstChar(fieldName);
@@ -592,20 +592,20 @@ public class TableHelper {
             return "";
         }
         String columnName = getColumnName(fieldName);
-        return columnName.replace("_" , "-" );
+        return columnName.replace("_", "-");
     }
 
     public String getEndWithIdField(String field) {
         if (field == null) {
             return null;
         }
-        int index = field.lastIndexOf("Id" );
-        if (index == (field.length() - 2)) {
+        int index = field.lastIndexOf("Id");
+        if (index > 0 && index == (field.length() - 2)) {
             String text = field.substring(0, index);
             return StringUtil.lowerCamelToUnderline(text);
         }
-        index = field.lastIndexOf("_id" );
-        if (index == (field.length() - 2)) {
+        index = field.lastIndexOf("_id");
+        if (index > 0 && index == (field.length() - 3)) {
             String text = field.substring(0, index);
             return StringUtil.lowerCamelToUnderline(text);
         }
@@ -620,20 +620,20 @@ public class TableHelper {
      * @return
      */
     public boolean isDateNode(String fieldName, JSONObject jsonNode) {
-        if (!StringUtil.isEmpty(fieldName) && fieldName.endsWith("_time" )) {
+        if (!StringUtil.isEmpty(fieldName) && fieldName.endsWith("_time")) {
             return true;
         }
         if (jsonNode == null) {
             return false;
         }
-        String javaType = jsonNode.getString("javaType" );
+        String javaType = jsonNode.getString("javaType");
         if (StringUtil.isNotEmpty(javaType)) {
             String text = javaType.toLowerCase();
-            if (text.contains("date" )) {
+            if (text.contains("date")) {
                 return true;
             }
         }
-        String format = jsonNode.getString("format" );
+        String format = jsonNode.getString("format");
         if (format != null) {
             if ("date-time".equals(format) || "time".equals(format) || "date".equals(format)) {
                 return true;
@@ -643,7 +643,7 @@ public class TableHelper {
     }
 
 
-    private Pattern pattern = Pattern.compile("^[A-Za-z_]+$" );
+    private Pattern pattern = Pattern.compile("^[A-Za-z_]+$");
 
     public String getColumnName(String relationProperty) {
         if (pattern.matcher(relationProperty).find()) {
@@ -751,7 +751,7 @@ public class TableHelper {
      * @return
      */
     public XTableField buildCreateTimeField() {
-        return doBuildTableField("create_time" , DbColumnType.DATE, false);
+        return doBuildTableField("create_time", DbColumnType.DATE, false);
     }
 
     /**
@@ -760,7 +760,7 @@ public class TableHelper {
      * @return
      */
     public XTableField buildUpdateTimeField() {
-        return doBuildTableField("update_time" , DbColumnType.DATE, false);
+        return doBuildTableField("update_time", DbColumnType.DATE, false);
     }
 
     /**

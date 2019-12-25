@@ -54,8 +54,10 @@ public class ValidateConditionUtil {
             validateCondition = new ValidateCondition();
             tableField.setValidate(validateCondition);
         }
-        Long minValue = jsonNode.getLongValue("minimum");
-        validateCondition.setMinValue(minValue);
+        Long minValue = jsonNode.getLong("minimum");
+        if (minValue != null) {
+            validateCondition.setMinValue(minValue);
+        }
     }
 
     public static void setMaxValue(XTableField tableField, JSONObject jsonNode) {
