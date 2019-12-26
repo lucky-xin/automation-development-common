@@ -7,7 +7,7 @@
 
     <groupId>automation.development.common</groupId>
     <artifactId>automation-development-common</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>

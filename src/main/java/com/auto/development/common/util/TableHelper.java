@@ -674,7 +674,7 @@ public class TableHelper {
     }
 
 
-    private Pattern pattern = Pattern.compile("^[A-Za-z_]+$");
+    private Pattern pattern = Pattern.compile("^[A-Za-z]+$");
 
     public String getColumnName(String relationProperty) {
         if (pattern.matcher(relationProperty).find()) {
