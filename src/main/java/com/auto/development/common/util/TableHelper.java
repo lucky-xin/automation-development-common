@@ -677,9 +677,6 @@ public class TableHelper {
     private Pattern pattern = Pattern.compile("^[A-Za-z]+$");
 
     public String getColumnName(String relationProperty) {
-        if (pattern.matcher(relationProperty).find()) {
-            return relationProperty.toLowerCase();
-        }
         return StringUtil.lowerCamelToUnderline(relationProperty);
     }
 
