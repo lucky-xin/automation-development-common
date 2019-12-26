@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.generator.config.rules.DbColumnType;
 
 /**
  * @author Luchaoxin
- * @Description: bmw只能采购管理系统常量池
+ * @Description: 常量池
  * @date 2019-05-07
  */
 public interface Constants {
